@@ -1,3 +1,4 @@
+const { ipcMain } = require('electron');
 const electron = require('electron');
 const { app, BrowserWindow, Menu } = electron;
 
@@ -11,6 +12,7 @@ app.on('ready', () => {
         }
     });
     mainWindow.loadURL(`file://${__dirname}/index.html`);
+    mainWindow.on('closed', () => app.quit());
 
     const mainMenu = Menu.buildFromTemplate(menuTemplate);
 
@@ -27,7 +29,14 @@ function createWindow() {
         title: "Add New Todo",
     });
     addWindow.loadURL(`file://${__dirname}/add.html`);
+    addWindow.on('closed', () => addWindow = null);
 }
+
+ipcMain.on('addTodo', (event, todo) => {
+    mainWindow.webContents.send('addTodo', todo);
+    addWindow.close();
+    console.log(todo);
+})
 
 const menuTemplate = [
     {
@@ -54,6 +63,23 @@ if(process.platform === "darwin"){
    menuTemplate.unshift({label: ''});
 }
 
-
+if(process.env.NODE_ENV !== 'production'){
+    //production development staging test
+    menuTemplate.push({
+        label: 'View',
+        submenu: [
+            {
+                role: 'Reload'
+            },
+            {
+                label: 'Developer Tools',
+                accelerator: process.platform === "darwin" ? 'Command+Option+I' : 'Ctrl+Shift+I',
+                click(item, focusedWindow){
+                    focusedWindow.toggleDevTools();
+                }
+            }
+        ]
+    })
+}
 
 

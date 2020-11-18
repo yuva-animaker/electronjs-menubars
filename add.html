@@ -9,9 +9,22 @@
     <form>
         <div>
             <label>Enter your Todo</label>
-            <input autofocus />
+            <input autofocus id="inputTag"/>
         </div>
         <button type="submit">Add</button>
     </form>
+    <script>
+        const electron = require('electron');
+        const { ipcRenderer } = electron;
+
+        document.querySelector('form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            let { value } = document.getElementById('inputTag');
+            ipcRenderer.send('addTodo', value);
+            console.log(value);
+        });
+
+
+    </script>
 </body>
 </html>
